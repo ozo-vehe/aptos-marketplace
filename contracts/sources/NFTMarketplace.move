@@ -1,4 +1,6 @@
 address 0xe0c2e76c204c24aecc40430e9ece251d8fcb0b5a55aa62fab0aa9ec5441a27b4 {
+/// NFTMarketplace module implements a decentralized marketplace for NFTs
+/// with support for direct sales, auctions, and royalties
 module NFTMarketplace {
     use 0x1::signer;
     use 0x1::vector;
@@ -7,27 +9,30 @@ module NFTMarketplace {
     use 0x1::event;
     use 0x1::timestamp;
 
+    /// Address of the marketplace contract
     const MARKETPLACE_ADDR: address =
         @0xe0c2e76c204c24aecc40430e9ece251d8fcb0b5a55aa62fab0aa9ec5441a27b4;
 
-    // A resource struct for token distribution after auction
+    /// Resource struct for managing token distribution after auction
     struct TokenVault has key {
         tokens: u64,
         nfts: vector<Recipient>
     }
 
+    /// Struct to track NFT recipients
     struct Recipient has store, drop, copy, key {
         nft_id: u64,
         recipients: vector<address>
     }
 
+    /// Struct to track auction bids
     struct Bids has store, drop, copy, key {
         nft_id: u64,
         bidders: vector<address>,
         bids: vector<u64>
     }
 
-    // Structures
+    /// Main NFT struct containing metadata and sale information
     struct NFT has store, copy, key {
         id: u64,
         owner: address,
@@ -39,8 +44,7 @@ module NFTMarketplace {
         for_sale: bool,
         for_auction: bool,
         rarity: u8,
-        royalty_percent: u64, // Royalty percentage for the creator
-        // Auction details
+        royalty_percent: u64,
         auction_start: u64,
         auction_end: u64,
         highest_bidder: address,
@@ -49,22 +53,25 @@ module NFTMarketplace {
         bid_history: vector<Bids>
     }
 
+    /// Marketplace struct containing all NFTs and fee information
     struct Marketplace has key {
         nfts: vector<NFT>,
-        fee_collector: u64 // Marketplace fee collected
+        fee_collector: u64
     }
 
+    /// Struct for tracking blacklisted NFTs
     struct Blacklist has key {
-        blacklisted: vector<u64> // List of blacklisted NFT IDs
+        blacklisted: vector<u64>
     }
 
-    // Events
+    /// Event emitted when marketplace is initialized
     #[event]
     struct MarketplaceInitializedEvent has drop, store {
         owner: address,
         fee_collector: u64
     }
 
+    /// Event emitted when new NFT is minted
     #[event]
     struct NFTMintedEvent has drop, store {
         id: u64,
@@ -72,12 +79,14 @@ module NFTMarketplace {
         creator: address
     }
 
+    /// Event emitted when NFT vault is created
     #[event]
     struct NFTVaultCreatedEvent has drop, store {
         id: u64,
         owner: address
     }
 
+    /// Event emitted when NFT is listed for sale
     #[event]
     struct NFTListedEvent has drop, store {
         id: u64,
@@ -85,6 +94,7 @@ module NFTMarketplace {
         price: u64
     }
 
+    /// Event emitted when NFT is sold
     #[event]
     struct NFTSoldEvent has drop, store {
         id: u64,
@@ -93,12 +103,14 @@ module NFTMarketplace {
         price: u64
     }
 
+    /// Event emitted when NFT is blacklisted
     #[event]
     struct NFTBlacklistedEvent has drop, store {
         id: u64,
         owner: address
     }
 
+    /// Event emitted when auction starts
     #[event]
     struct AuctionStartedEvent has drop, store {
         id: u64,
@@ -108,6 +120,7 @@ module NFTMarketplace {
         auction_end: u64
     }
 
+    /// Event emitted when auction ends
     #[event]
     struct AuctionEndedEvent has drop, store {
         id: u64,
@@ -116,10 +129,10 @@ module NFTMarketplace {
         price: u64
     }
 
-    // Constants
-    const MARKETPLACE_FEE_PERCENT: u64 = 2; // 2% fee
+    /// Marketplace fee percentage
+    const MARKETPLACE_FEE_PERCENT: u64 = 2;
 
-    // Initialization
+    /// Initialize the marketplace with empty collections
     public entry fun initialize(account: &signer) {
         let marketplace = Marketplace {
             nfts: vector::empty<NFT>(),
@@ -137,7 +150,6 @@ module NFTMarketplace {
         move_to(account, blacklist);
         move_to(account, token_vault);
 
-        // Emit MarketplaceInitializedEvent event
         event::emit(
             MarketplaceInitializedEvent {
                 owner: signer::address_of(account),
@@ -146,21 +158,24 @@ module NFTMarketplace {
         );
     }
 
+    /// Get details of a specific NFT
     #[view]
     public fun get_nft_details(nft_id: u64): NFT acquires Marketplace {
         let marketplace = borrow_global<Marketplace>(MARKETPLACE_ADDR);
         let nft = vector::borrow(&marketplace.nfts, nft_id);
 
-        assert!(nft.id == nft_id, 100); // Invalid NFT ID
+        assert!(nft.id == nft_id, 100);
         return *nft
     }
 
+    /// Get all NFTs in the marketplace
     #[view]
     public fun get_all_nfts(): vector<NFT> acquires Marketplace {
         let marketplace = borrow_global<Marketplace>(MARKETPLACE_ADDR);
         return marketplace.nfts
     }
 
+    /// Get total marketplace fees collected
     #[view]
     public fun get_marketplace_fee_collector(): u64 acquires Marketplace {
         let marketplace = borrow_global<Marketplace>(MARKETPLACE_ADDR);
@@ -168,7 +183,7 @@ module NFTMarketplace {
         marketplace.fee_collector
     }
 
-    // Minting
+    /// Mint a new NFT with specified metadata
     public entry fun mint_nft(
         account: &signer,
         name: vector<u8>,
@@ -181,9 +196,9 @@ module NFTMarketplace {
         let nft_id = vector::length(&marketplace.nfts);
         let token_vault = borrow_global_mut<TokenVault>(MARKETPLACE_ADDR);
 
-        assert!(royalty_percent <= 10, 200); // Max royalty 10%
-        assert!(vector::length(&name) > 0, 201); // Name is required
-        assert!(vector::length(&uri) > 0, 202); // URI is required
+        assert!(royalty_percent <= 10, 200);
+        assert!(vector::length(&name) > 0, 201);
+        assert!(vector::length(&uri) > 0, 202);
 
         let new_nft = NFT {
             id: nft_id,
@@ -213,7 +228,6 @@ module NFTMarketplace {
         vector::push_back(&mut marketplace.nfts, new_nft);
         vector::push_back(&mut token_vault.nfts, vault);
 
-        // Emit NFTMintedEvent event
         event::emit(
             NFTMintedEvent {
                 id: nft_id,
@@ -229,27 +243,26 @@ module NFTMarketplace {
         );
     }
 
-    // Listing for Sale
+    /// List NFT for direct sale
     public entry fun list_for_sale(
         account: &signer, nft_id: u64, price: u64
     ) acquires Marketplace {
         let marketplace = borrow_global_mut<Marketplace>(MARKETPLACE_ADDR);
         let nft_ref = vector::borrow_mut(&mut marketplace.nfts, nft_id);
 
-        assert!(nft_ref.owner == signer::address_of(account), 300); // Caller is not the owner
-        assert!(price > 0, 301); // Invalid price
+        assert!(nft_ref.owner == signer::address_of(account), 300);
+        assert!(price > 0, 301);
 
         nft_ref.for_sale = true;
         nft_ref.price = price;
         nft_ref.for_auction = false;
 
-        // Emit NFTListedEvent event
         event::emit(
             NFTListedEvent { id: nft_id, owner: signer::address_of(account), price }
         );
     }
 
-    // List NFT for Auction
+    /// List NFT for auction
     public entry fun list_for_auction(
         account: &signer,
         nft_id: u64,
@@ -260,13 +273,9 @@ module NFTMarketplace {
         let marketplace = borrow_global_mut<Marketplace>(MARKETPLACE_ADDR);
         let nft_ref = vector::borrow_mut(&mut marketplace.nfts, nft_id);
 
-
-        // Create a coin store
-        // coin::create_coin_store<aptos_coin::AptosCoin>(account);
-
-        assert!(nft_ref.owner == signer::address_of(account), 400); // Caller is not the owner
-        assert!(auction_start < auction_end, 401); // Invalid auction time
-        assert!(price > 0, 402); // Invalid reserve price
+        assert!(nft_ref.owner == signer::address_of(account), 400);
+        assert!(auction_start < auction_end, 401);
+        assert!(price > 0, 402);
 
         nft_ref.for_sale = false;
         nft_ref.for_auction = true;
@@ -275,7 +284,6 @@ module NFTMarketplace {
         nft_ref.price = price;
         nft_ref.auction_active = true;
 
-        // Initialize an empty bid history
         let bid_entry = Bids {
             nft_id,
             bidders: vector::empty<address>(),
@@ -283,7 +291,6 @@ module NFTMarketplace {
         };
         vector::push_back(&mut nft_ref.bid_history, bid_entry);
 
-        // Emit AuctionStartedEvent event
         event::emit(
             AuctionStartedEvent {
                 id: nft_id,
@@ -295,57 +302,48 @@ module NFTMarketplace {
         );
     }
 
-    // Purchase NFT
+    /// Purchase NFT listed for direct sale
     public entry fun purchase_nft(
         account: &signer, nft_id: u64, payment: u64
     ) acquires Marketplace {
         let marketplace = borrow_global_mut<Marketplace>(MARKETPLACE_ADDR);
         let nft_ref = vector::borrow_mut(&mut marketplace.nfts, nft_id);
 
-        assert!(nft_ref.for_sale, 500); // NFT not for sale
-        assert!(payment >= nft_ref.price, 501); // Insufficient payment
+        assert!(nft_ref.for_sale, 500);
+        assert!(payment >= nft_ref.price, 501);
 
-        // Calculate royalties and fees
         let fee = (nft_ref.price * MARKETPLACE_FEE_PERCENT) / 100;
         let royalty = (nft_ref.price * nft_ref.royalty_percent) / 100;
         let seller_revenue = nft_ref.price - fee - royalty;
 
-        // Update fee collector
         marketplace.fee_collector = marketplace.fee_collector + fee;
-        // let marketplace_fee = coin::extract();
 
-        // Transfer payments
         coin::transfer<aptos_coin::AptosCoin>(account, nft_ref.owner, seller_revenue);
         coin::transfer<aptos_coin::AptosCoin>(account, nft_ref.creator, royalty);
-        // coin::deposit<aptos_coin::AptosCoin>(MARKETPLACE_ADDR, marketplace_fee);
 
-        // Transfer ownership
         nft_ref.owner = signer::address_of(account);
         nft_ref.for_sale = false;
         nft_ref.price = 0;
     }
 
+    /// Place bid on NFT auction
     public entry fun place_bid(account: &signer, nft_id: u64, amount: u64) acquires Marketplace, TokenVault {
         let marketplace = borrow_global_mut<Marketplace>(MARKETPLACE_ADDR);
         let token_vault = borrow_global_mut<TokenVault>(MARKETPLACE_ADDR);
 
-        // Validate NFT ID
-        assert!(nft_id < vector::length(&marketplace.nfts), 600); // Invalid NFT ID
+        assert!(nft_id < vector::length(&marketplace.nfts), 600);
 
         let nft_ref = vector::borrow_mut(&mut marketplace.nfts, nft_id);
 
-        // Validate auction state
-        assert!(nft_ref.for_auction, 601); // NFT not for auction
-        assert!(amount > nft_ref.highest_bid, 602); // Bid amount too low
-        assert!(nft_ref.auction_end > timestamp::now_seconds(), 603); // Auction has ended
+        assert!(nft_ref.for_auction, 601);
+        assert!(amount > nft_ref.highest_bid, 602);
+        assert!(nft_ref.auction_end > timestamp::now_seconds(), 603);
 
         let bid_entry = vector::borrow_mut(&mut nft_ref.bid_history, 0);
 
-        // Update highest bid and bidder
         nft_ref.highest_bidder = signer::address_of(account);
         nft_ref.highest_bid = amount;
 
-        // Record bid
         if (!vector::contains(&bid_entry.bidders, &signer::address_of(account))) {
             vector::push_back(&mut bid_entry.bidders, signer::address_of(account));
             vector::push_back(&mut bid_entry.bids, amount);
@@ -356,20 +354,18 @@ module NFTMarketplace {
             vector::replace(&mut bid_entry.bids, index, amount);
         };
 
-        // Deposit token to the smart contract
         let nft_vault = vector::borrow_mut(&mut token_vault.nfts, nft_id);
-        // let bid = coin::;
         token_vault.tokens = token_vault.tokens + amount;
 
         vector::push_back(&mut nft_vault.recipients, signer::address_of(account));
-
     }
 
+    /// Delist NFT from sale or auction
     public fun delist_nft(account: &signer, nft_id: u64) acquires Marketplace {
         let marketplace = borrow_global_mut<Marketplace>(MARKETPLACE_ADDR);
         let nft_ref = vector::borrow_mut(&mut marketplace.nfts, nft_id);
 
-        assert!(nft_ref.owner == signer::address_of(account), 900); // Caller is not the owner
+        assert!(nft_ref.owner == signer::address_of(account), 900);
         if (nft_ref.for_auction) {
             nft_ref.auction_active = false;
             nft_ref.auction_start = 0;
@@ -385,12 +381,13 @@ module NFTMarketplace {
         };
     }
 
-    // Blacklisting
+    /// Add NFT to blacklist
     public entry fun blacklist_nft(account: &signer, nft_id: u64) acquires Blacklist {
         let blacklist = borrow_global_mut<Blacklist>(signer::address_of(account));
         vector::push_back(&mut blacklist.blacklisted, nft_id);
     }
 
+    /// Check if NFT is blacklisted
     public fun is_nft_blacklisted(account: address, nft_id: u64): bool acquires Blacklist {
         if (!exists<Blacklist>(account)) {
             return false
@@ -399,12 +396,12 @@ module NFTMarketplace {
         vector::contains(&blacklist.blacklisted, &nft_id)
     }
 
-    // Withdraw Marketplace Fees
+    /// Withdraw collected marketplace fees
     public entry fun withdraw_fees(account: &signer, amount: u64) acquires Marketplace {
         let marketplace = borrow_global_mut<Marketplace>(MARKETPLACE_ADDR);
 
-        assert!(amount <= marketplace.fee_collector, 700); // Insufficient fees
-        assert!(MARKETPLACE_ADDR == signer::address_of(account), 701); // Caller is not the owner
+        assert!(amount <= marketplace.fee_collector, 700);
+        assert!(MARKETPLACE_ADDR == signer::address_of(account), 701);
 
         marketplace.fee_collector = marketplace.fee_collector - amount;
         coin::transfer<aptos_coin::AptosCoin>(
