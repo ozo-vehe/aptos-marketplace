@@ -3,6 +3,8 @@
 
 The **Aptos NFT Marketplace** is a decentralized platform built on the Aptos blockchain that facilitates the creation, buying, selling, and auctioning of Non-Fungible Tokens (NFTs). As the NFT space continues to grow, this marketplace aims to provide a secure, efficient, and user-friendly environment for artists, collectors, and enthusiasts to engage with digital assets.
 
+[Live link](https://aptos-marketplace-sigma.vercel.app/)
+
 ![NFTERS-12-27-2024_03_29_AM](https://github.com/user-attachments/assets/5e7e07dc-0231-4055-9d05-d9359be3c1f3)
 
 
