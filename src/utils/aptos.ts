@@ -15,7 +15,7 @@ export const ADDRESS = "0xe0c2e76c204c24aecc40430e9ece251d8fcb0b5a55aa62fab0aa9e
 export const APTOS_CONTRACT = `${ADDRESS}::NFTMarketplace`;
 
 const config = new AptosConfig({ network: Network.TESTNET });
-export const client = new AptosClient("https://fullnode.devnet.aptoslabs.com");
+export const client = new AptosClient("https://fullnode.testnet.aptoslabs.com/v1");
 export const aptos = new Aptos(config);
 const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
 const COIN_TYPE = `0x1::coin::CoinStore<${APTOS_COIN}>`;
