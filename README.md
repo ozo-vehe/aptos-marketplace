@@ -6,6 +6,10 @@ The **Aptos NFT Marketplace** is a decentralized platform built on the Aptos blo
 ![NFTERS-12-27-2024_03_29_AM](https://github.com/user-attachments/assets/5e7e07dc-0231-4055-9d05-d9359be3c1f3)
 
 
+https://github.com/user-attachments/assets/4b994034-a95e-42da-bae9-ed50380ca1ad
+
+
+
 
 ### Purpose
 
