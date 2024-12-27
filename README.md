@@ -3,6 +3,10 @@
 
 The **Aptos NFT Marketplace** is a decentralized platform built on the Aptos blockchain that facilitates the creation, buying, selling, and auctioning of Non-Fungible Tokens (NFTs). As the NFT space continues to grow, this marketplace aims to provide a secure, efficient, and user-friendly environment for artists, collectors, and enthusiasts to engage with digital assets.
 
+![NFTERS-12-27-2024_03_29_AM](https://github.com/user-attachments/assets/5e7e07dc-0231-4055-9d05-d9359be3c1f3)
+
+
+
 ### Purpose
 
 The primary purpose of the Aptos NFT Marketplace is to empower creators and collectors by providing them with a robust platform to showcase and trade their digital art and collectibles. By leveraging the capabilities of the Aptos blockchain, the marketplace ensures that all transactions are transparent, secure, and immutable. This fosters trust among users and enhances the overall experience of trading NFTs.
@@ -77,6 +81,45 @@ In summary, the Aptos NFT Marketplace is not just a platform for trading digital
 - Purchase an NFT: Call `purchase_nft` to buy an NFT directly.
 - Place a Bid: Use `place_bid` to bid on an NFT in an auction.
 - Get your NFT: Call `withdraw_bid` to get your NFT, if you are the highest bidder.
+
+## Sample NFT Details to Use
+```text
+Name: Oceanic Whisper 
+Description: A serene moment captured in the vast blue depths of the ocean. 
+https://fastly.picsum.photos/id/186/200/200.jpg?hmac=bNtKzMZT8HFzZq8mbTSWaQvmkX8T7TE47fspKMfxVl8 
+ 
+Name: Forest Mirage 
+Description: An enchanted forest where light and shadow play in harmony. 
+https://fastly.picsum.photos/id/255/200/200.jpg?hmac=IYQV36UT5-F1dbK_CQXF7PDfLfwcnwKijqeBCo3yMlc 
+ 
+Name: Galactic Pulse 
+Description: The heartbeat of the universe, emanating in waves of color. 
+https://fastly.picsum.photos/id/522/200/200.jpg?hmac=-4K81k9CA5C9S2DWiH5kP8rMvaAPk2LByYZHP9ejTjA 
+ 
+Name: Lunar Blossom 
+Description: A rare flower blooming under the soft glow of the moon. 
+https://fastly.picsum.photos/id/501/200/200.jpg?hmac=tKXe69j4tHhkAA_Qc3XinkTuubEWwkFVhA9TR4TmCG8 
+ 
+Name: Ember Phoenix 
+Description: A fiery bird rising from the ashes, symbolizing rebirth and strength. 
+https://fastly.picsum.photos/id/68/200/200.jpg?hmac=CPg7ZGK1PBwt6DmjjPRApX_t-mOiYxt0pel50VH4Gwk 
+ 
+Name: Starlit Haven 
+Description: A sanctuary under a blanket of shimmering stars. 
+https://fastly.picsum.photos/id/891/200/200.jpg?hmac=J19K6yDbzNDUjkInb56-h-n_xM3i40GCfHWor0YKgyU 
+ 
+Name: Mystic Aurora 
+Description: The northern lights captured in their most vibrant and magical form. 
+https://fastly.picsum.photos/id/999/200/200.jpg?hmac=iwXALEStJtHL4Thxk_YbLNHNmjq9ZrIQYFUvtxndOaU 
+ 
+Name: Crystal Echo 
+Description: The sound of crystal chimes resonating in an ethereal realm. 
+https://fastly.picsum.photos/id/338/200/200.jpg?hmac=5S5SeR5xW8mbN3Ml7wTTJPePX392JafhcFMGm7IFNy0 
+ 
+Name: Eternal Cascade 
+Description: A waterfall that flows endlessly, reflecting the infinite beauty of nature. 
+https://fastly.picsum.photos/id/572/200/200.jpg?hmac=YFsNUCQc2Dfz_5O0HY8HmDfquz04XrdcpJ0P4Z7plRY
+```
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a pull request or open an issue for any enhancements or bug fixes.
